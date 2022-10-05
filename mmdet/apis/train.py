@@ -52,16 +52,24 @@ def train_detector(model,
                    cfg,
                    distributed=False,
                    validate=False,
-                   logger=None):
+                   logger=None #,
+                   #timestamp=None,
+                   #meta=None
+                   ):
     if logger is None:
         logger = get_root_logger(cfg.log_level)
 
     # start training
     if distributed:
-        _dist_train(model, dataset, cfg, validate=validate)
+        _dist_train(model, dataset, cfg, validate=validate,
+            #logger=logger,timestamp=timestamp,meta=meta
+            )
     else:
-        _non_dist_train(model, dataset, cfg, validate=validate)
+        _non_dist_train(model, dataset, cfg, validate=validate
+            #logger=logger,timestamp=timestamp,meta=meta
+            )
 
+#ここまではチェックした。
 
 def build_optimizer(model, optimizer_cfg):
     """Build optimizer from configs.
@@ -151,8 +159,15 @@ def _dist_train(model, dataset, cfg, validate=False):
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
-    runner = Runner(model, batch_processor, optimizer, cfg.work_dir,
-                    cfg.log_level, mean_teacher=cfg.mean_teacher)
+    runner = Runner(
+        model,
+        batch_processor,
+        optimizer,
+        cfg.work_dir,
+        cfg.log_level,
+        mean_teacher=cfg.mean_teacher
+        #meta=meta
+        )
 
     # fp16 setting
     fp16_cfg = cfg.get('fp16', None)
